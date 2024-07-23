@@ -42,7 +42,7 @@ const getNextScore = (
 export const updateFlashcardProgress = async (
   flashcardId: number,
   performanceRating: number
-): Promise<{ error?: string }> => {
+): Promise<{ error?: string; nextReviewAt?: Date }> => {
   const { userId } = auth();
 
   if (!userId) {
@@ -58,6 +58,7 @@ export const updateFlashcardProgress = async (
     });
 
     const now = new Date();
+    let nextReviewAt: Date;
 
     if (existingProgress) {
       const nextScore = getNextScore(
@@ -65,13 +66,14 @@ export const updateFlashcardProgress = async (
         existingProgress.consecutiveCorrectAnswers,
         performanceRating
       );
+      nextReviewAt = new Date(now.getTime() + nextScore.msToNextReview);
 
       await db
         .update(flashcardProgress)
         .set({
           easiness: nextScore.easiness,
           consecutiveCorrectAnswers: nextScore.consecutiveCorrectAnswers,
-          nextReviewAt: new Date(now.getTime() + nextScore.msToNextReview),
+          nextReviewAt: nextReviewAt,
           lastReviewedAt: now,
         })
         .where(eq(flashcardProgress.id, existingProgress.id));
@@ -85,18 +87,19 @@ export const updateFlashcardProgress = async (
       }
 
       const initialScore = getNextScore(250, 0, performanceRating);
+      nextReviewAt = new Date(now.getTime() + initialScore.msToNextReview);
 
       await db.insert(flashcardProgress).values({
         userId,
         flashcardId,
         easiness: initialScore.easiness,
         consecutiveCorrectAnswers: initialScore.consecutiveCorrectAnswers,
-        nextReviewAt: new Date(now.getTime() + initialScore.msToNextReview),
+        nextReviewAt: nextReviewAt,
         lastReviewedAt: now,
       });
     }
 
-    return {};
+    return { nextReviewAt };
   } catch (error) {
     console.error("Error updating flashcard progress:", error);
     return { error: "Failed to update flashcard progress" };

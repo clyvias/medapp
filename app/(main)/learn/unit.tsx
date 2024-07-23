@@ -36,14 +36,28 @@ export const Unit = ({
         {lessons.map((lesson, index) => {
           const isCurrent = lesson.id === activeLessonId;
           const totalFlashcards = lesson.flashcards.length;
-          const completedFlashcards = lesson.flashcards.filter(
-            (flashcard) =>
-              flashcard.flashcardProgress.length > 0 &&
-              new Date(flashcard.flashcardProgress[0].nextReviewAt) > new Date()
+          const reviewedFlashcards = lesson.flashcards.filter(
+            (flashcard) => flashcard.flashcardProgress.length > 0
           ).length;
-          const percentage = Math.round(
-            (completedFlashcards / totalFlashcards) * 100
-          );
+          const isStarted = reviewedFlashcards > 0;
+          const isCompleted =
+            reviewedFlashcards === totalFlashcards && totalFlashcards > 0;
+          const percentage = isStarted
+            ? Math.round((reviewedFlashcards / totalFlashcards) * 100)
+            : 0;
+
+          let nextReviewAt: Date | null = null;
+          if (isStarted) {
+            nextReviewAt = lesson.flashcards
+              .flatMap((f) => f.flashcardProgress)
+              .reduce(
+                (earliest, fp) =>
+                  fp.nextReviewAt && fp.nextReviewAt < earliest
+                    ? fp.nextReviewAt
+                    : earliest,
+                new Date(8640000000000000) // Max date
+              );
+          }
 
           return (
             <LessonButton
@@ -53,8 +67,9 @@ export const Unit = ({
               totalCount={lessons.length - 1}
               current={isCurrent}
               percentage={percentage}
-              completed={lesson.completed}
-              nextReviewAt={lesson.nextReviewAt}
+              completed={isCompleted}
+              started={isStarted}
+              nextReviewAt={nextReviewAt}
               lessonName={lesson.title}
             />
           );

@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Confetti from "react-confetti";
-import { toast } from "sonner";
-import { useWindowSize } from "react-use";
-
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { Footer } from "./footer";
@@ -13,11 +9,15 @@ import { ResultCard } from "./result-card";
 import { updateFlashcardProgress } from "@/actions/flashcard-progress";
 import { reduceHearts } from "@/actions/user-progress";
 import { useHeartsModal } from "@/store/use-hearts-modal";
+import { toast } from "sonner";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 type Flashcard = {
   id: number;
   question: string;
   answer: string;
+  nextReviewAt?: Date;
 };
 
 type Props = {
@@ -34,15 +34,16 @@ export const Quiz = ({
   userSubscription,
 }: Props) => {
   const router = useRouter();
-  const { width, height } = useWindowSize();
   const { open: openHeartsModal } = useHeartsModal();
+  const { width, height } = useWindowSize();
 
-  const [pending, startTransition] = useTransition();
   const [flashcards, setFlashcards] = useState(initialFlashcards);
   const [hearts, setHearts] = useState(initialHearts);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [nextReviewAt, setNextReviewAt] = useState<Date | null>(null);
 
   const currentFlashcard = flashcards[currentIndex];
   const isLastFlashcard = currentIndex === flashcards.length - 1;
@@ -52,42 +53,71 @@ export const Quiz = ({
   };
 
   const onRate = (rating: number) => {
-    if (pending) return;
     setSelectedRating(rating);
   };
 
-  const onContinue = () => {
-    if (pending || selectedRating === null) return;
+  const onContinue = async () => {
+    if (selectedRating === null) return;
 
-    startTransition(() => {
-      updateFlashcardProgress(currentFlashcard.id, selectedRating)
-        .then(() => {
-          if (selectedRating < 3) {
-            setHearts((prev) => Math.max(prev - 1, 0));
-            reduceHearts(currentFlashcard.id)
-              .then((response) => {
-                if (response?.error === "hearts") {
-                  openHeartsModal();
-                }
-              })
-              .catch(() =>
-                toast.error("Something went wrong. Please try again.")
-              );
-          }
+    try {
+      const updatedFlashcard = await updateFlashcardProgress(
+        currentFlashcard.id,
+        selectedRating
+      );
 
-          if (isLastFlashcard) {
-            router.push(`/lesson/${initialLessonId}/complete`);
-          } else {
-            setCurrentIndex((prev) => prev + 1);
-            setShowAnswer(false);
-            setSelectedRating(null);
-          }
-        })
-        .catch(() => toast.error("Something went wrong. Please try again."));
-    });
+      if (selectedRating < 3) {
+        const response = await reduceHearts(currentFlashcard.id);
+        if (response?.error === "hearts") {
+          openHeartsModal();
+          return;
+        }
+        setHearts((prev) => Math.max(prev - 1, 0));
+      }
+
+      // Update the flashcard with the new nextReviewAt
+      setFlashcards((prev) =>
+        prev.map((fc) =>
+          fc.id === currentFlashcard.id
+            ? { ...fc, nextReviewAt: updatedFlashcard.nextReviewAt }
+            : fc
+        )
+      );
+
+      if (isLastFlashcard) {
+        const earliestReview = flashcards.reduce((earliest, fc) => {
+          if (!fc.nextReviewAt) return earliest;
+          return fc.nextReviewAt < earliest ? fc.nextReviewAt : earliest;
+        }, new Date(8640000000000000)); // Max date
+
+        setNextReviewAt(earliestReview);
+        setIsCompleted(true);
+      } else {
+        setCurrentIndex((prev) => prev + 1);
+        setShowAnswer(false);
+        setSelectedRating(null);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
+  };
+
+  const formatNextReview = (date: Date) => {
+    const now = new Date();
+    const diffHours = Math.round(
+      (date.getTime() - now.getTime()) / (1000 * 60 * 60)
+    );
+    if (diffHours < 24) {
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""}`;
+    }
+    const diffDays = Math.round(diffHours / 24);
+    return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
   };
 
   if (flashcards.length === 0) {
+    return <div>No flashcards available.</div>;
+  }
+
+  if (isCompleted) {
     return (
       <>
         <Confetti
@@ -98,20 +128,21 @@ export const Quiz = ({
           height={height}
         />
         <div className="flex flex-col gap-y-4 lg:gap-y-8 max-w-lg mx-auto text-center items-center justify-center h-full">
-          <h1 className="text-xl lg:text-3xl font-bold text-neutral-700">
-            COmpletaste todos los flashcards de esa lección.
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-700">
+            Lesson Complete!
           </h1>
           <div className="flex items-center gap-x-4 w-full">
-            <ResultCard
-              variant="points"
-              value={initialFlashcards.length * 10}
-            />
+            <ResultCard variant="points" value={flashcards.length * 10} />
             <ResultCard variant="hearts" value={hearts} />
           </div>
+          {nextReviewAt && (
+            <div className="text-lg font-semibold text-neutral-600">
+              Next review in: {formatNextReview(nextReviewAt)}
+            </div>
+          )}
         </div>
         <Footer
           lessonId={initialLessonId}
-          status="completed"
           onCheck={() => router.push("/learn")}
         />
       </>
@@ -125,38 +156,49 @@ export const Quiz = ({
         percentage={(currentIndex / flashcards.length) * 100}
         hasActiveSubscription={!!userSubscription?.isActive}
       />
-      <div className="flex-1">
-        <div className="h-full flex items-center justify-center">
-          <div className="lg:min-h-[350px] lg:w-[600px] w-full px-6 lg:px-0 flex flex-col gap-y-12">
-            <h1 className="text-lg lg:text-3xl text-center lg:text-start font-bold text-neutral-700">
-              {showAnswer ? "Answer" : "Question"}
-            </h1>
-            <div>
-              <QuestionBubble question={currentFlashcard.question} />
-              {showAnswer && (
-                <div className="mt-4 bg-white p-6 rounded-lg shadow-md">
-                  <p className="text-xl font-semibold">
-                    {currentFlashcard.answer}
-                  </p>
-                </div>
-              )}
-              {!showAnswer && (
-                <div className="mt-4">
-                  <button
-                    onClick={onShowAnswer}
-                    className="w-full py-4 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition"
-                  >
-                    Show Answer
-                  </button>
-                </div>
-              )}
-              {showAnswer && (
-                <div className="mt-4 flex justify-between">
+      <div className="flex-1 flex items-center justify-center px-4 md:px-6 lg:px-8">
+        <div className="w-full max-w-4xl">
+          {" "}
+          {/* Increased max-width */}
+          <h1 className="text-2xl lg:text-3xl text-center font-bold text-neutral-700 mb-8">
+            {showAnswer ? "Answer" : "Question"}
+          </h1>
+          <div className="space-y-8">
+            {" "}
+            {/* Added vertical spacing */}
+            <QuestionBubble question={currentFlashcard.question} />
+            {showAnswer && (
+              <div className="mt-6 bg-white p-6 rounded-lg shadow-md w-full">
+                {" "}
+                {/* Widened answer box */}
+                <p className="text-xl font-semibold text-neutral-700 whitespace-pre-wrap">
+                  {currentFlashcard.answer}
+                </p>
+              </div>
+            )}
+            {!showAnswer && (
+              <div className="mt-6 w-full">
+                <button
+                  onClick={onShowAnswer}
+                  className="w-full py-4 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition text-lg"
+                >
+                  Mostrar Respuesta
+                </button>
+              </div>
+            )}
+            {showAnswer && (
+              <div className="mt-8 w-full">
+                {" "}
+                {/* Increased top margin */}
+                <p className="text-lg font-semibold text-neutral-600 mb-4 text-center">
+                  Rate your understanding:
+                </p>
+                <div className="flex justify-between items-center">
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <button
                       key={rating}
                       onClick={() => onRate(rating)}
-                      className={`px-4 py-2 rounded-lg font-semibold ${
+                      className={`px-6 py-3 rounded-lg font-semibold text-lg ${
                         rating === selectedRating
                           ? "bg-blue-500 text-white"
                           : rating < 3
@@ -168,20 +210,13 @@ export const Quiz = ({
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
       <Footer
         disabled={!showAnswer || selectedRating === null}
-        status={
-          selectedRating !== null
-            ? selectedRating >= 3
-              ? "correct"
-              : "wrong"
-            : "none"
-        }
         onCheck={onContinue}
       />
     </>
