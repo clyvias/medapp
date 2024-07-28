@@ -7,6 +7,7 @@ import {
   text,
   boolean,
   timestamp,
+  date,
   json,
 } from "drizzle-orm/pg-core";
 
@@ -171,10 +172,30 @@ export const userProgress = pgTable("user_progress", {
   points: integer("points").notNull().default(0),
 });
 
-export const userProgressRelations = relations(userProgress, ({ one }) => ({
-  activeCourse: one(courses, {
-    fields: [userProgress.activeCourseId],
-    references: [courses.id],
+export const userProgressRelations = relations(
+  userProgress,
+  ({ one, many }) => ({
+    activeCourse: one(courses, {
+      fields: [userProgress.activeCourseId],
+      references: [courses.id],
+    }),
+    statistics: many(userStatistics),
+  })
+);
+
+export const userStatistics = pgTable("user_statistics", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  date: date("date").notNull(),
+  cardsReviewed: integer("cards_reviewed").notNull().default(0),
+  timeStudied: integer("time_studied").notNull().default(0), // in seconds
+  streakDays: integer("streak_days").notNull().default(0),
+});
+
+export const userStatisticsRelations = relations(userStatistics, ({ one }) => ({
+  user: one(userProgress, {
+    fields: [userStatistics.userId],
+    references: [userProgress.userId],
   }),
 }));
 

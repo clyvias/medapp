@@ -9,6 +9,7 @@ import { StickyWrapper } from "@/components/sticky-wrapper";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Quests } from "@/components/quests";
+import { CompactUserStatistics } from "@/components/compact-user-statistics";
 
 const Leaderboard = async () => {
   const userProgressData = getUserProgress();
@@ -30,6 +31,7 @@ const Leaderboard = async () => {
           points={userProgress.points}
           hasActiveSubscription={false}
         />
+        <CompactUserStatistics />
         <Quests points={userProgress.points} />
       </StickyWrapper>
       <FeedWrapper>

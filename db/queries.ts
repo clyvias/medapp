@@ -1,7 +1,7 @@
 import { cache } from "react";
 import db from "./drizzle";
 import { auth } from "@clerk/nextjs/server";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, desc } from "drizzle-orm";
 import {
   challengeProgress,
   courses,
@@ -13,6 +13,7 @@ import {
   Lesson,
   Flashcard,
   FlashcardProgress,
+  userStatistics,
 } from "./schema";
 
 export const getUserProgress = cache(async () => {
@@ -246,4 +247,114 @@ export const getTopTenUsers = cache(async () => {
     },
   });
   return data;
+});
+
+// Helper function to get today's date as a string in 'YYYY-MM-DD' format
+const getTodayString = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to get a date 7 days ago as a string in 'YYYY-MM-DD' format
+const getSevenDaysAgoString = () => {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  return sevenDaysAgo.toISOString().split("T")[0];
+};
+
+export const getUserStatistics = cache(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null;
+  }
+
+  const todayString = getTodayString();
+
+  const stats = await db.query.userStatistics.findFirst({
+    where: and(
+      eq(userStatistics.userId, userId),
+      eq(userStatistics.date, todayString)
+    ),
+  });
+
+  if (!stats) {
+    // Create a new statistics entry for today
+    const newStats = await db
+      .insert(userStatistics)
+      .values({
+        userId,
+        date: todayString,
+      })
+      .returning();
+    return newStats[0];
+  }
+
+  return stats;
+});
+
+export const updateUserStatistics = cache(
+  async (cardsReviewed: number, timeStudied: number) => {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return null;
+    }
+
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
+    const existingStats = await db.query.userStatistics.findFirst({
+      where: and(
+        eq(userStatistics.userId, userId),
+        eq(userStatistics.date, today)
+      ),
+    });
+
+    if (existingStats) {
+      const updatedStats = await db
+        .update(userStatistics)
+        .set({
+          cardsReviewed: existingStats.cardsReviewed + cardsReviewed,
+          timeStudied: existingStats.timeStudied + timeStudied,
+          streakDays: existingStats.streakDays + 1,
+        })
+        .where(
+          and(eq(userStatistics.userId, userId), eq(userStatistics.date, today))
+        )
+        .returning();
+
+      return updatedStats[0];
+    } else {
+      const newStats = await db
+        .insert(userStatistics)
+        .values({
+          userId,
+          date: today,
+          cardsReviewed,
+          timeStudied,
+          streakDays: 1,
+        })
+        .returning();
+
+      return newStats[0];
+    }
+  }
+);
+
+export const getWeeklyStatistics = cache(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null;
+  }
+
+  const sevenDaysAgoString = getSevenDaysAgoString();
+
+  return db.query.userStatistics.findMany({
+    where: and(
+      eq(userStatistics.userId, userId),
+      gt(userStatistics.date, sevenDaysAgoString)
+    ),
+    orderBy: [desc(userStatistics.date)],
+  });
 });

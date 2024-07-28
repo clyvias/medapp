@@ -8,6 +8,7 @@ import { getUserProgress } from "@/db/queries";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { Progress } from "@/components/ui/progress";
 import { quests } from "@/constants";
+import { UserStatistics } from "@/components/user-statistics";
 
 const QuestsPage = async () => {
   const userProgressData = getUserProgress();
@@ -30,9 +31,10 @@ const QuestsPage = async () => {
         <div className="w-full flex flex-col items-center">
           <Image src="/quests.svg" alt="quests" height={90} width={90} />
           <h1 className="text-center font-bold text-neutral-800 text-2xl my-6">
-            Misiones
+            Misiones y Estadísticas
           </h1>
-          <p className="mb-6 text-center text-lg text-muted-foreground">
+          <UserStatistics />
+          <p className="mb-6 text-center text-lg text-muted-foreground mt-8">
             Complete las misiones gañando puntos.
           </p>
           <ul className="w-full">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
@@ -8,6 +8,7 @@ import { Footer } from "./footer";
 import { ResultCard } from "./result-card";
 import { updateFlashcardProgress } from "@/actions/flashcard-progress";
 import { reduceHearts } from "@/actions/user-progress";
+import { updateUserStatistics } from "@/actions/update-statistics";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { toast } from "sonner";
 import Confetti from "react-confetti";
@@ -45,6 +46,7 @@ export const Quiz = ({
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [nextReviewAt, setNextReviewAt] = useState<Date | null>(null);
+  const [sessionStartTime] = useState(new Date());
 
   const currentFlashcard = flashcards[currentIndex];
   const isLastFlashcard = currentIndex === flashcards.length - 1;
@@ -96,6 +98,17 @@ export const Quiz = ({
 
         setNextReviewAt(earliestReview);
         setIsCompleted(true);
+        // Update user statistics when the lesson is completed
+        const endTime = new Date();
+        const timeStudied = Math.round(
+          (endTime.getTime() - sessionStartTime.getTime()) / 1000
+        );
+        try {
+          await updateUserStatistics(flashcards.length, timeStudied);
+        } catch (error) {
+          console.error("Failed to update user statistics:", error);
+          // Don't throw an error here, just log it to avoid disrupting the user experience
+        }
       } else {
         setCurrentIndex((prev) => prev + 1);
         setShowAnswer(false);
