@@ -8,6 +8,7 @@ import { getTopTenUsers, getUserProgress } from "@/db/queries";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Quests } from "@/components/quests";
 
 const Leaderboard = async () => {
   const userProgressData = getUserProgress();
@@ -29,6 +30,7 @@ const Leaderboard = async () => {
           points={userProgress.points}
           hasActiveSubscription={false}
         />
+        <Quests points={userProgress.points} />
       </StickyWrapper>
       <FeedWrapper>
         <div className="w-full flex flex-col items-center">
@@ -36,7 +38,7 @@ const Leaderboard = async () => {
           <h1 className="text-center font-bold text-neutral-800 text-2xl my-6">
             Ranking
           </h1>
-          <p>
+          <p className="mb-6 text-center text-lg text-muted-foreground">
             Vea dónde se encuentra en comparación con otros estudiantes de la
             comunidad
           </p>
