@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import db from "@/db/drizzle";
-import { flashcardProgress, flashcards } from "@/db/schema";
+import { flashcardProgress, flashcards, userProgress } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
 const getNextScore = (
@@ -97,6 +97,22 @@ export const updateFlashcardProgress = async (
         nextReviewAt: nextReviewAt,
         lastReviewedAt: now,
       });
+    }
+
+    // Update user points
+    const pointsToAdd = performanceRating >= 3 ? 10 : 0;
+
+    const currentUserProgress = await db.query.userProgress.findFirst({
+      where: eq(userProgress.userId, userId),
+    });
+
+    if (currentUserProgress) {
+      await db
+        .update(userProgress)
+        .set({
+          points: currentUserProgress.points + pointsToAdd,
+        })
+        .where(eq(userProgress.userId, userId));
     }
 
     return { nextReviewAt };

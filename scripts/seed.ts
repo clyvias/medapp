@@ -108,6 +108,7 @@ const main = async () => {
         question: "¿Qué es la ley de continuidad en hidrodinámica?",
         answer:
           "La ley de continuidad establece que el caudal de ingreso es igual al caudal de salida en un tubo rígido sin fugas ni entradas adicionales.",
+        order: 1, // Add this line
       },
       {
         lessonId: 1,
@@ -115,12 +116,14 @@ const main = async () => {
           "¿Qué relación existe entre la velocidad del fluido y el área de sección transversal según la ley de continuidad?",
         answer:
           "Son inversamente proporcionales. Donde el área es menor, el fluido transita a mayor velocidad, y viceversa.",
+        order: 2,
       },
       {
         lessonId: 1,
         question: "¿Qué establece el teorema de Bernoulli?",
         answer:
           "El teorema de Bernoulli explica la presión como una forma de energía y establece que la energía total de un fluido ideal en un tubo rígido es constante.",
+        order: 3,
       },
       {
         lessonId: 1,
@@ -128,6 +131,7 @@ const main = async () => {
           "Cuáles son los componentes de la presión total según Bernoulli?",
         answer:
           "La presión total es la suma de la presión lateral, la presión cinética y la presión potencial gravitatoria.",
+        order: 4,
       },
       {
         lessonId: 1,
@@ -135,6 +139,7 @@ const main = async () => {
           "Qué es un aneurisma y cuáles son sus posibles consecuencias?",
         answer:
           "Un aneurisma es una dilatación localizada y permanente en las paredes de las arterias. Puede llevar a la ruptura del vaso y hemorragia, o a la formación de trombos debido a la estasis sanguínea.",
+        order: 5,
       },
       {
         lessonId: 1,
@@ -142,6 +147,7 @@ const main = async () => {
           "¿Cuál es la diferencia principal entre el flujo laminar y el turbulento?",
         answer:
           "El flujo laminar es ordenado y silencioso, mientras que el flujo turbulento es desordenado y audible (produce murmullos).",
+        order: 6,
       },
       // ... (more flashcards)
     ]);

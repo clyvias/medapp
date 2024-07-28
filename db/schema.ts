@@ -66,6 +66,7 @@ export const flashcards = pgTable("flashcards", {
     .notNull(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
+  order: integer("order").notNull(),
 });
 
 export const flashcardsRelations = relations(flashcards, ({ one, many }) => ({
@@ -166,7 +167,7 @@ export const userProgress = pgTable("user_progress", {
   activeCourseId: integer("active_course_id").references(() => courses.id, {
     onDelete: "cascade",
   }),
-  hearts: integer("hearts").notNull().default(5),
+  hearts: integer("hearts").notNull().default(50),
   points: integer("points").notNull().default(0),
 });
 

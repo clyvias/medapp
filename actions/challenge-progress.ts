@@ -15,7 +15,6 @@ export const upsertChallengeProgress = async (challengeId: number) => {
   }
 
   const currentUserProgress = await getUserProgress();
-  //TODO: handle subscription
 
   if (!currentUserProgress) {
     throw new Error("No se encontró el progreso del usuario");
@@ -40,7 +39,6 @@ export const upsertChallengeProgress = async (challengeId: number) => {
 
   const isPractice = !!existingChallengeProgress;
 
-  //TODO: not if user has a subscription
   if (currentUserProgress.hearts === 0 && !isPractice) {
     return { error: "hearts" };
   }
@@ -60,25 +58,18 @@ export const upsertChallengeProgress = async (challengeId: number) => {
         points: currentUserProgress.points + 10,
       })
       .where(eq(userProgress.userId, userId));
+  } else {
+    await db
+      .insert(challengeProgress)
+      .values({ challengeId, userId, completed: true });
 
-    revalidatePath("/learn");
-    revalidatePath("/lesson");
-    revalidatePath("/quests");
-    revalidatePath("/leaderboard");
-    revalidatePath(`/lesson/${lessonId}`);
-    return;
+    await db
+      .update(userProgress)
+      .set({
+        points: currentUserProgress.points + 10,
+      })
+      .where(eq(userProgress.userId, userId));
   }
-
-  await db
-    .insert(challengeProgress)
-    .values({ challengeId, userId, completed: true });
-
-  await db
-    .update(userProgress)
-    .set({
-      points: currentUserProgress.points + 10,
-    })
-    .where(eq(userProgress.userId, userId));
 
   revalidatePath("/learn");
   revalidatePath("/lesson");

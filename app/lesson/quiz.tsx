@@ -39,6 +39,7 @@ export const Quiz = ({
 
   const [flashcards, setFlashcards] = useState(initialFlashcards);
   const [hearts, setHearts] = useState(initialHearts);
+  const [earnedPoints, setEarnedPoints] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
@@ -64,6 +65,10 @@ export const Quiz = ({
         currentFlashcard.id,
         selectedRating
       );
+
+      if (selectedRating >= 3) {
+        setEarnedPoints((prev) => prev + 10);
+      }
 
       if (selectedRating < 3) {
         const response = await reduceHearts(currentFlashcard.id);
@@ -132,7 +137,7 @@ export const Quiz = ({
             Lesson Complete!
           </h1>
           <div className="flex items-center gap-x-4 w-full">
-            <ResultCard variant="points" value={flashcards.length * 10} />
+            <ResultCard variant="points" value={earnedPoints} />
             <ResultCard variant="hearts" value={hearts} />
           </div>
           {nextReviewAt && (
@@ -143,7 +148,7 @@ export const Quiz = ({
         </div>
         <Footer
           lessonId={initialLessonId}
-          onCheck={() => router.push("/learn")}
+          onCheck={() => router.push("/learn?refresh=true")}
         />
       </>
     );
