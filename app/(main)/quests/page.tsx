@@ -3,12 +3,12 @@ import { redirect } from "next/navigation";
 
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { UserProgress } from "@/components/user-progress";
-
 import { getUserProgress } from "@/db/queries";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { Progress } from "@/components/ui/progress";
 import { quests } from "@/constants";
-import { UserStatistics } from "@/components/user-statistics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CompactUserStatistics } from "@/components/compact-user-statistics";
 
 const QuestsPage = async () => {
   const userProgressData = getUserProgress();
@@ -33,35 +33,34 @@ const QuestsPage = async () => {
           <h1 className="text-center font-bold text-neutral-800 text-2xl my-6">
             Misiones y Estadísticas
           </h1>
-          <UserStatistics />
-          <p className="mb-6 text-center text-lg text-muted-foreground mt-8">
-            Complete las misiones gañando puntos.
-          </p>
-          <ul className="w-full">
-            {quests.map((quest) => {
-              const progress = (userProgress.points / quest.value) * 100;
+          <CompactUserStatistics className="mb-6" />
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Misiones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-4">
+                {quests.map((quest) => {
+                  const progress = (userProgress.points / quest.value) * 100;
 
-              return (
-                <div
-                  className="flex items-center w-full p-4 gap-x-4 border-t-2"
-                  key={quest.title}
-                >
-                  <Image
-                    src="/points.svg"
-                    alt="puntos"
-                    width={60}
-                    height={60}
-                  />
-                  <div className="flex flex-col gap-y-2 w-full">
-                    <p className="text-neutral-700 text-xl font-bold">
-                      {quest.title}
-                    </p>
-                    <Progress value={progress} className="h-3" />
-                  </div>
-                </div>
-              );
-            })}
-          </ul>
+                  return (
+                    <li key={quest.title} className="flex items-center gap-x-4">
+                      <Image
+                        src="/points.svg"
+                        alt="puntos"
+                        width={40}
+                        height={40}
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{quest.title}</p>
+                        <Progress value={progress} className="h-2 mt-2" />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </FeedWrapper>
     </div>

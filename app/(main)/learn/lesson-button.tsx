@@ -54,21 +54,21 @@ export const LessonButton = ({
   };
 
   const getReviewText = () => {
-    if (!started) return "Not started";
-    if (!nextReviewAt) return "Review now";
+    if (!started) return "No iniciado";
+    if (!nextReviewAt) return "Revisar ahora";
 
     const now = new Date();
     const diffMs = nextReviewAt.getTime() - now.getTime();
     const diffMinutes = Math.round(diffMs / (1000 * 60));
 
-    if (diffMinutes <= 0) return "Review now";
-    if (diffMinutes < 60) return `Review in ${diffMinutes}m`;
+    if (diffMinutes <= 0) return "Revisar ahora";
+    if (diffMinutes < 60) return `Revisar en ${diffMinutes}m`;
 
     const diffHours = Math.round(diffMs / (1000 * 60 * 60));
-    if (diffHours < 24) return `Review in ${diffHours}h`;
+    if (diffHours < 24) return `Revisar en ${diffHours}h`;
 
     const diffDays = Math.round(diffHours / 24);
-    return `Review in ${diffDays}d`;
+    return `Revisar en ${diffDays}d`;
   };
 
   return (
@@ -103,10 +103,7 @@ export const LessonButton = ({
         </div>
         <div className="mt-2 text-center">
           <p className="text-sm font-semibold text-neutral-700">{lessonName}</p>
-          <p className="text-xs text-muted-foreground">
-            {completed ? "Completed - " : ""}
-            {getReviewText()}
-          </p>
+          <p className="text-xs text-muted-foreground">{getReviewText()}</p>
         </div>
       </div>
     </Link>

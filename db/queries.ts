@@ -263,34 +263,49 @@ const getSevenDaysAgoString = () => {
 };
 
 export const getUserStatistics = cache(async () => {
-  const { userId } = await auth();
+  const { userId } = auth();
 
   if (!userId) {
     return null;
   }
 
-  const todayString = getTodayString();
+  const today = new Date().toISOString().split("T")[0];
 
-  const stats = await db.query.userStatistics.findFirst({
-    where: and(
-      eq(userStatistics.userId, userId),
-      eq(userStatistics.date, todayString)
-    ),
+  const recentStats = await db.query.userStatistics.findMany({
+    where: eq(userStatistics.userId, userId),
+    orderBy: [desc(userStatistics.date)],
+    limit: 30, // Get last 30 days to calculate streak
   });
 
-  if (!stats) {
-    // Create a new statistics entry for today
-    const newStats = await db
-      .insert(userStatistics)
-      .values({
-        userId,
-        date: todayString,
-      })
-      .returning();
-    return newStats[0];
+  let currentStreak = 0;
+  let i = 0;
+
+  // Calculate current streak
+  while (i < recentStats.length) {
+    const stat = recentStats[i];
+    const statDate = new Date(stat.date);
+    const expectedDate = new Date(today);
+    expectedDate.setDate(expectedDate.getDate() - i);
+
+    if (
+      statDate.toISOString().split("T")[0] ===
+      expectedDate.toISOString().split("T")[0]
+    ) {
+      currentStreak++;
+      i++;
+    } else {
+      break;
+    }
   }
 
-  return stats;
+  const todayStats = recentStats.find((stat) => stat.date === today);
+
+  return todayStats
+    ? {
+        ...todayStats,
+        streakDays: currentStreak,
+      }
+    : null;
 });
 
 export const updateUserStatistics = cache(

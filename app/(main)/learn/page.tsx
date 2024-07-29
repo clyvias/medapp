@@ -7,7 +7,6 @@ import { redirect } from "next/navigation";
 import { Unit } from "./unit";
 import { Promo } from "@/components/promo";
 import { Quests } from "@/components/quests";
-import { UserStatistics } from "@/components/user-statistics";
 import { CompactUserStatistics } from "@/components/compact-user-statistics";
 
 const LearnPage = async () => {

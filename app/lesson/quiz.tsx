@@ -179,7 +179,7 @@ export const Quiz = ({
           {" "}
           {/* Increased max-width */}
           <h1 className="text-2xl lg:text-3xl text-center font-bold text-neutral-700 mb-8">
-            {showAnswer ? "Answer" : "Question"}
+            {showAnswer ? "Respuesta" : "Pregunta"}
           </h1>
           <div className="space-y-8">
             {" "}
@@ -209,7 +209,7 @@ export const Quiz = ({
                 {" "}
                 {/* Increased top margin */}
                 <p className="text-lg font-semibold text-neutral-600 mb-4 text-center">
-                  Rate your understanding:
+                  Califica tu comprensión:
                 </p>
                 <div className="flex justify-between items-center">
                   {[1, 2, 3, 4, 5].map((rating) => (
