@@ -24,6 +24,8 @@ const LearnPage = async () => {
     redirect("/courses");
   }
 
+  const now = new Date();
+
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
       <StickyWrapper>
@@ -47,24 +49,36 @@ const LearnPage = async () => {
               order={unit.order}
               description={unit.description}
               title={unit.title}
-              lessons={unit.lessons.map((lesson) => ({
-                ...lesson,
-                completed: lesson.flashcards.every(
+              lessons={unit.lessons.map((lesson) => {
+                const totalFlashcards = lesson.flashcards.length;
+                const dueFlashcards = lesson.flashcards.filter(
                   (flashcard) =>
-                    flashcard.flashcardProgress.length > 0 &&
-                    new Date(flashcard.flashcardProgress[0].nextReviewAt) >
-                      new Date()
-                ),
-                nextReviewAt: lesson.flashcards
+                    flashcard.flashcardProgress.length === 0 ||
+                    new Date(flashcard.flashcardProgress[0].nextReviewAt) <= now
+                ).length;
+                const progress =
+                  ((totalFlashcards - dueFlashcards) / totalFlashcards) * 100;
+
+                const nextReviewAt = lesson.flashcards
                   .flatMap((f) => f.flashcardProgress)
                   .reduce(
                     (earliest, fp) =>
-                      fp && fp.nextReviewAt < earliest
-                        ? fp.nextReviewAt
+                      fp && new Date(fp.nextReviewAt) < earliest
+                        ? new Date(fp.nextReviewAt)
                         : earliest,
                     new Date(8640000000000000) // Max date
-                  ),
-              }))}
+                  );
+
+                return {
+                  ...lesson,
+                  progress: Math.max(0, Math.min(100, progress)),
+                  started:
+                    totalFlashcards > 0 && dueFlashcards < totalFlashcards,
+                  completed: dueFlashcards === 0 && totalFlashcards > 0,
+                  isReviewNeeded: dueFlashcards > 0,
+                  nextReviewAt: nextReviewAt < now ? now : nextReviewAt,
+                };
+              })}
               activeLesson={courseProgress?.activeLesson}
               activeLessonId={courseProgress?.activeLessonId}
             />

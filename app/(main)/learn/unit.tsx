@@ -29,6 +29,8 @@ export const Unit = ({
   activeLesson,
   activeLessonId,
 }: Props) => {
+  const now = new Date();
+
   return (
     <>
       <UnitBanner title={title} description={description} />
@@ -39,11 +41,20 @@ export const Unit = ({
           const reviewedFlashcards = lesson.flashcards.filter(
             (flashcard) => flashcard.flashcardProgress.length > 0
           ).length;
+          const dueFlashcards = lesson.flashcards.filter(
+            (flashcard) =>
+              flashcard.flashcardProgress.length === 0 ||
+              new Date(flashcard.flashcardProgress[0].nextReviewAt) <= now
+          ).length;
+
           const isStarted = reviewedFlashcards > 0;
           const isCompleted =
-            reviewedFlashcards === totalFlashcards && totalFlashcards > 0;
-          const percentage = isStarted
-            ? Math.round((reviewedFlashcards / totalFlashcards) * 100)
+            reviewedFlashcards === totalFlashcards && dueFlashcards === 0;
+          const isReviewNeeded = dueFlashcards > 0;
+          const progress = isStarted
+            ? Math.round(
+                ((totalFlashcards - dueFlashcards) / totalFlashcards) * 100
+              )
             : 0;
 
           let nextReviewAt: Date | null = null;
@@ -52,12 +63,15 @@ export const Unit = ({
               .flatMap((f) => f.flashcardProgress)
               .reduce(
                 (earliest, fp) =>
-                  fp.nextReviewAt && fp.nextReviewAt < earliest
-                    ? fp.nextReviewAt
+                  fp.nextReviewAt && new Date(fp.nextReviewAt) < earliest
+                    ? new Date(fp.nextReviewAt)
                     : earliest,
                 new Date(8640000000000000) // Max date
               );
           }
+
+          const hasReviewDate =
+            isCompleted && !!nextReviewAt && nextReviewAt > now;
 
           return (
             <LessonButton
@@ -66,10 +80,12 @@ export const Unit = ({
               index={index}
               totalCount={lessons.length - 1}
               current={isCurrent}
-              percentage={percentage}
+              progress={progress}
               completed={isCompleted}
               started={isStarted}
+              isReviewNeeded={isReviewNeeded}
               nextReviewAt={nextReviewAt}
+              hasReviewDate={hasReviewDate}
               lessonName={lesson.title}
             />
           );

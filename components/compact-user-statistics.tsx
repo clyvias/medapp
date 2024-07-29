@@ -22,7 +22,7 @@ export const CompactUserStatistics = async ({
   return (
     <Card className={`w-full bg-white shadow-sm ${className}`}>
       <CardContent className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Progreso de hoy</h3>
+        <h3 className="text-lg font-semibold mb-4">Tu progreso</h3>
         <div className="grid grid-cols-2 gap-4">
           <StatItem
             icon={<BarChart2 className="w-4 h-4 text-blue-500" />}
@@ -37,7 +37,7 @@ export const CompactUserStatistics = async ({
           <StatItem
             icon={<Zap className="w-4 h-4 text-yellow-500" />}
             label="Racha actual"
-            value={`${todayStats?.streakDays || 0} día`}
+            value={`${todayStats?.streakDays || 0} días`}
           />
           <StatItem
             icon={<Calendar className="w-4 h-4 text-purple-500" />}

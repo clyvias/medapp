@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Crown, Brain } from "lucide-react";
-import { CircularProgressbarWithChildren } from "react-circular-progressbar";
+import { Check, Clock, Brain } from "lucide-react";
+import {
+  CircularProgressbarWithChildren,
+  buildStyles,
+} from "react-circular-progressbar";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,10 +17,12 @@ type Props = {
   index: number;
   totalCount: number;
   current: boolean;
-  percentage: number;
-  completed: boolean;
+  progress: number;
   started: boolean;
+  completed: boolean;
+  isReviewNeeded: boolean;
   nextReviewAt: Date | null;
+  hasReviewDate: boolean;
   lessonName: string;
 };
 
@@ -26,10 +31,12 @@ export const LessonButton = ({
   index,
   totalCount,
   current,
-  percentage,
-  completed,
+  progress,
   started,
+  completed,
+  isReviewNeeded,
   nextReviewAt,
+  hasReviewDate,
   lessonName,
 }: Props) => {
   const cycleLength = 8;
@@ -48,27 +55,29 @@ export const LessonButton = ({
   const isLast = index === totalCount;
 
   const getIcon = () => {
-    if (completed) return <Check className="h-10 w-10" />;
-    if (started) return <Crown className="h-10 w-10" />;
-    return <Brain className="h-10 w-10 text-gray-400" />;
+    if (isReviewNeeded || hasReviewDate) return <Clock className="h-10 w-10" />;
+    if (!started) return <Brain className="h-10 w-10" />;
+    return <Check className="h-10 w-10" />;
   };
 
   const getReviewText = () => {
     if (!started) return "No iniciado";
-    if (!nextReviewAt) return "Revisar ahora";
+    if (isReviewNeeded) return "Repasar ahora";
+    if (hasReviewDate && nextReviewAt) {
+      const now = new Date();
+      const diffTime = nextReviewAt.getTime() - now.getTime();
+      const diffMinutes = Math.ceil(diffTime / (1000 * 60));
 
-    const now = new Date();
-    const diffMs = nextReviewAt.getTime() - now.getTime();
-    const diffMinutes = Math.round(diffMs / (1000 * 60));
+      if (diffMinutes < 60) return `Repaso en ${diffMinutes}m`;
 
-    if (diffMinutes <= 0) return "Revisar ahora";
-    if (diffMinutes < 60) return `Revisar en ${diffMinutes}m`;
+      const diffHours = Math.ceil(diffTime / (1000 * 3600));
+      if (diffHours < 24) return `Repaso en ${diffHours}h`;
 
-    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
-    if (diffHours < 24) return `Revisar en ${diffHours}h`;
-
-    const diffDays = Math.round(diffHours / 24);
-    return `Revisar en ${diffDays}d`;
+      const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+      return `Repaso en ${diffDays}d`;
+    }
+    if (completed) return "Completed";
+    return "In progress";
   };
 
   return (
@@ -82,15 +91,15 @@ export const LessonButton = ({
       >
         <div className="relative h-[102px] w-[102px]">
           <CircularProgressbarWithChildren
-            value={completed ? 100 : started ? percentage : 0}
-            styles={{
-              path: {
-                stroke: completed ? "#22c55e" : started ? "#4ade80" : "#e5e7eb",
-              },
-              trail: {
-                stroke: "#e5e7eb",
-              },
-            }}
+            value={progress}
+            strokeWidth={8}
+            styles={buildStyles({
+              strokeLinecap: "round",
+              pathColor: started ? "#4ade80" : "#e5e7eb",
+              trailColor: "#e5e7eb",
+              rotation: 0.15,
+              pathTransitionDuration: 0.5,
+            })}
           >
             <Button
               size="rounded"
