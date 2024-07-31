@@ -55,7 +55,7 @@ export const LessonButton = ({
   const isLast = index === totalCount;
 
   const getIcon = () => {
-    if (isReviewNeeded || hasReviewDate) return <Clock className="h-10 w-10" />;
+    if (hasReviewDate) return <Clock className="h-10 w-10" />;
     if (!started) return <Brain className="h-10 w-10" />;
     return <Check className="h-10 w-10" />;
   };
@@ -103,7 +103,7 @@ export const LessonButton = ({
           >
             <Button
               size="rounded"
-              variant={current ? "secondary" : "default"}
+              variant={started ? "secondary" : "default"}
               className="h-[70px] w-[70px] border-b-8"
             >
               {getIcon()}
