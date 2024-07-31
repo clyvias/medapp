@@ -67,6 +67,8 @@ export const flashcards = pgTable("flashcards", {
     .notNull(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
+  questionImageUrl: text("question_image_url"),
+  answerImageUrl: text("answer_image_url"),
   order: integer("order").notNull(),
 });
 

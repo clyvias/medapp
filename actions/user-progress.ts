@@ -22,9 +22,9 @@ export const upsertUserProgress = async (courseId: number) => {
     throw new Error("Materia no encontrada");
   }
 
-  if (!course.units.length || !course.units[0].lessons.length) {
-    throw new Error("Materia sin lecciones");
-  }
+  // if (!course.units.length || !course.units[0].lessons.length) {
+  //   throw new Error("Materia sin lecciones");
+  // }
 
   const existingUserProgress = await getUserProgress();
 

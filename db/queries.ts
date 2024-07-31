@@ -123,6 +123,14 @@ export const getCourseProgress = cache(async () => {
     where: eq(lessons.unitId, userProgress.activeCourseId),
     with: {
       flashcards: {
+        columns: {
+          id: true,
+          question: true,
+          answer: true,
+          questionImageUrl: true,
+          answerImageUrl: true,
+          order: true,
+        },
         with: {
           flashcardProgress: {
             where: and(

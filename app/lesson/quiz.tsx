@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
+import { AnswerBubble } from "./answer-bubble";
 import { Footer } from "./footer";
 import { ResultCard } from "./result-card";
 import { updateFlashcardProgress } from "@/actions/flashcard-progress";
@@ -18,6 +19,8 @@ type Flashcard = {
   id: number;
   question: string;
   answer: string;
+  questionImageUrl?: string;
+  answerImageUrl?: string;
   nextReviewAt?: Date;
 };
 
@@ -185,15 +188,7 @@ export const Quiz = ({
             {" "}
             {/* Added vertical spacing */}
             <QuestionBubble question={currentFlashcard.question} />
-            {showAnswer && (
-              <div className="mt-6 bg-white p-6 rounded-lg shadow-md w-full">
-                {" "}
-                {/* Widened answer box */}
-                <p className="text-xl font-semibold text-neutral-700 whitespace-pre-wrap">
-                  {currentFlashcard.answer}
-                </p>
-              </div>
-            )}
+            {showAnswer && <AnswerBubble answer={currentFlashcard.answer} />}
             {!showAnswer && (
               <div className="mt-6 w-full">
                 <button
