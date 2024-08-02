@@ -7,12 +7,16 @@ type Props = {
   hearts: number;
   percentage: number;
   hasActiveSubscription: boolean;
+  currentFlashcard: number;
+  totalFlashcards: number;
 };
 
 export const Header = ({
   hearts,
   percentage,
   hasActiveSubscription,
+  currentFlashcard,
+  totalFlashcards,
 }: Props) => {
   const { open } = useExitModal();
 
@@ -23,6 +27,9 @@ export const Header = ({
         className="text-slate-500 hover:opacity-75 transition cursor-pointer"
       />
       <Progress value={percentage} />
+      <div className="text-neutral-500 font-semibold">
+        {currentFlashcard}/{totalFlashcards}
+      </div>
       <div className="text-rose-500 flex items-center font-bold">
         <Image
           src="/heart.svg"

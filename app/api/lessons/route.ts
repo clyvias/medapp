@@ -5,9 +5,9 @@ import { lessons } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export const GET = async (req: Request) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const url = new URL(req.url);
   const filterParam = url.searchParams.get("filter");
@@ -40,9 +40,9 @@ export const GET = async (req: Request) => {
 };
 
 export const POST = async (req: Request) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const body = await req.json();
   const data = await db.insert(lessons).values(body).returning();

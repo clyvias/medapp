@@ -57,7 +57,7 @@ export const LessonButton = ({
   const getIcon = () => {
     if (hasReviewDate) return <Clock className="h-10 w-10" />;
     if (!started) return <Brain className="h-10 w-10" />;
-    return <Check className="h-10 w-10" />;
+    return <Brain className="h-10 w-10" />;
   };
 
   const getReviewText = () => {

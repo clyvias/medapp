@@ -171,22 +171,20 @@ export const Quiz = ({
   }
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <Header
         hearts={hearts}
         percentage={(currentIndex / flashcards.length) * 100}
         hasActiveSubscription={!!userSubscription?.isActive}
+        currentFlashcard={currentIndex + 1}
+        totalFlashcards={flashcards.length}
       />
-      <div className="flex-1 flex items-center justify-center px-4 md:px-6 lg:px-8">
-        <div className="w-full max-w-4xl">
-          {" "}
-          {/* Increased max-width */}
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="max-w-4xl mx-auto px-4 py-6">
           <h1 className="text-2xl lg:text-3xl text-center font-bold text-neutral-700 mb-8">
             {showAnswer ? "Respuesta" : "Pregunta"}
           </h1>
           <div className="space-y-8">
-            {" "}
-            {/* Added vertical spacing */}
             <QuestionBubble question={currentFlashcard.question} />
             {showAnswer && <AnswerBubble answer={currentFlashcard.answer} />}
             {!showAnswer && (
@@ -201,8 +199,6 @@ export const Quiz = ({
             )}
             {showAnswer && (
               <div className="mt-8 w-full">
-                {" "}
-                {/* Increased top margin */}
                 <p className="text-lg font-semibold text-neutral-600 mb-4 text-center">
                   Califica tu comprensión:
                 </p>
@@ -232,6 +228,6 @@ export const Quiz = ({
         disabled={!showAnswer || selectedRating === null}
         onCheck={onContinue}
       />
-    </>
+    </div>
   );
 };

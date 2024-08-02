@@ -5,9 +5,9 @@ import { flashcards } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const url = new URL(req.url);
   const filterParam = url.searchParams.get("filter");
@@ -40,9 +40,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   try {
     const body = await req.json();

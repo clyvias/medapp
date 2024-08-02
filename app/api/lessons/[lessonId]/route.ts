@@ -8,9 +8,9 @@ export const GET = async (
   req: Request,
   { params }: { params: { lessonId: number } }
 ) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const data = await db.query.lessons.findFirst({
     where: eq(lessons.id, params.lessonId),
@@ -23,9 +23,9 @@ export const PUT = async (
   req: Request,
   { params }: { params: { lessonId: number } }
 ) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const body = await req.json();
   const data = await db
@@ -41,9 +41,9 @@ export const DELETE = async (
   req: Request,
   { params }: { params: { lessonId: number } }
 ) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  // if (!isAdmin()) {
+  //   return new NextResponse("Unauthorized", { status: 401 });
+  // }
 
   const data = await db
     .delete(lessons)

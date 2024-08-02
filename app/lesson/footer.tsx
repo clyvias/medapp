@@ -12,8 +12,8 @@ export const Footer = ({ onCheck, disabled, lessonId }: Props) => {
   const isMobile = useMedia("(max-width: 1024px)");
 
   return (
-    <footer className="lg:-h[140px] h-[100px] border-t-2">
-      <div className="max-w-[1140px] h-full mx-auto flex items-center justify-between px-6 lg:px-10">
+    <footer className="bg-white border-t-2 py-4">
+      <div className="max-w-[1140px] mx-auto flex items-center justify-between px-6 lg:px-10">
         <Button
           disabled={disabled}
           className="ml-auto"
