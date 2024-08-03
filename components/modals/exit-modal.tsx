@@ -55,7 +55,7 @@ export const ExitModal = () => {
               size="lg"
               onClick={() => {
                 close();
-                router.push("/learn");
+                router.push("/learn?refresh=true");
               }}
             >
               Cerrar Sesión

@@ -125,14 +125,30 @@ export const Quiz = ({
 
   const formatNextReview = (date: Date) => {
     const now = new Date();
-    const diffHours = Math.round(
-      (date.getTime() - now.getTime()) / (1000 * 60 * 60)
-    );
+    const diffTime = date.getTime() - now.getTime();
+    const diffMinutes = Math.round(diffTime / (1000 * 60));
+
+    if (diffMinutes < 60) {
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""}`;
+    }
+
+    const diffHours = Math.round(diffTime / (1000 * 60 * 60));
     if (diffHours < 24) {
       return `${diffHours} hour${diffHours !== 1 ? "s" : ""}`;
     }
-    const diffDays = Math.round(diffHours / 24);
-    return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays < 30) {
+      return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+    }
+
+    const diffMonths = Math.round(diffDays / 30);
+    if (diffMonths < 12) {
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""}`;
+    }
+
+    const diffYears = Math.round(diffDays / 365);
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""}`;
   };
 
   if (flashcards.length === 0) {
