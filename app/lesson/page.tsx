@@ -1,6 +1,6 @@
 import { getLesson, getUserProgress, getCourseProgress } from "@/db/queries";
 import { redirect } from "next/navigation";
-import { Quiz } from "./quiz"; // Make sure this path is correct
+import { Quiz } from "./quiz";
 
 const LessonPage = async () => {
   const userProgressData = getUserProgress();

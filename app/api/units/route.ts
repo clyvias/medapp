@@ -20,8 +20,6 @@ export const GET = async (req: Request) => {
     }
   }
 
-  console.log("API Filter:", filterObj);
-
   const query = db.$with("filtered_units").as(
     db
       .select()

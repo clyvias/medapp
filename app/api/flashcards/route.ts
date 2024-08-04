@@ -20,8 +20,6 @@ export async function GET(req: Request) {
     }
   }
 
-  console.log("API Filter:", filterObj);
-
   const query = db.$with("filtered_flashcards").as(
     db
       .select()

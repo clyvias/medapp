@@ -34,7 +34,6 @@ export const GET = async (req: Request) => {
   );
 
   const result = await db.with(query).select().from(query);
-  console.log("API Response:", result);
 
   return NextResponse.json(result);
 };
