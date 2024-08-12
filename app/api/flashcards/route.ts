@@ -20,6 +20,8 @@ export async function GET(req: Request) {
     }
   }
 
+  console.log("API Filter:", filterObj);
+
   const query = db.$with("filtered_flashcards").as(
     db
       .select()
@@ -29,6 +31,7 @@ export async function GET(req: Request) {
           ? eq(flashcards.lessonId, Number(filterObj.lessonId))
           : sql`TRUE`
       )
+      .orderBy(flashcards.order) // This line ensures flashcards are sorted by order
   );
 
   const result = await db.with(query).select().from(query);

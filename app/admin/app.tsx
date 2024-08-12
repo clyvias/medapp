@@ -18,7 +18,7 @@ import { LessonEdit } from "./lesson/edit";
 import { LessonCreate } from "./lesson/create";
 
 import { FlashcardList } from "./flashcard/list";
-import { FlashcardEdit } from "./flashcard/edit";
+import FlashcardEdit from "./flashcard/edit";
 import { FlashcardCreate } from "./flashcard/create";
 import { LessonShow } from "./lesson/show";
 import { UnitShow } from "./unit/show";

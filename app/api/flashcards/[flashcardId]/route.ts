@@ -28,9 +28,20 @@ export const PUT = async (
   // }
 
   const body = await req.json();
+
+  // Fetch the current flashcard to get its order
+  const currentFlashcard = await db.query.flashcards.findFirst({
+    where: eq(flashcards.id, params.flashcardId),
+  });
+
+  if (!currentFlashcard) {
+    return new NextResponse("Flashcard not found", { status: 404 });
+  }
+
+  // Update the flashcard, maintaining its original order
   const data = await db
     .update(flashcards)
-    .set({ ...body })
+    .set({ ...body, order: currentFlashcard.order })
     .where(eq(flashcards.id, params.flashcardId))
     .returning();
 
